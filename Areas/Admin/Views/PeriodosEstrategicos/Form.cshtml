@@ -1,0 +1,32 @@
+@model PeriodoEstrategicoForm
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Nuevo periodo estratégico" : "Editar periodo estratégico";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = "Horizonte de varios años que agrupa los periodos operativos.";
+}
+
+<form asp-action="Save" method="post" class="form-modal">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" placeholder="Ej. Plan Estratégico 2025–2028" />
+        </div>
+        <div class="row">
+            <div class="col">
+                <label asp-for="FechaInicio" class="form-label"></label>
+                <input asp-for="FechaInicio" type="date" class="form-control" />
+            </div>
+            <div class="col">
+                <label asp-for="FechaFin" class="form-label"></label>
+                <input asp-for="FechaFin" type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Index" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

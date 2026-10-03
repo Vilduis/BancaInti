@@ -1,0 +1,43 @@
+@model AsignacionEvaluador
+@* Hilo de comentarios entre evaluador y evaluado. ViewData["AccionComentar"] = URL del POST. *@
+<div class="card" id="comentarios">
+    <div class="card-header"><i class="bi bi-chat-left-text me-1"></i> Comentarios</div>
+    <div class="card-body">
+        @if (Model.Comentarios.Count == 0)
+        {
+            <p class="text-muted small">Aún no hay comentarios.</p>
+        }
+        @foreach (var c in Model.Comentarios)
+        {
+            var esEvaluador = c.AutorId == Model.EvaluadorId;
+            <div class="mb-3 p-2 rounded @(esEvaluador ? "bg-light" : "border")">
+                <div class="small text-muted mb-1">
+                    <strong>@c.Autor?.NombreCompleto</strong> · @(esEvaluador ? "Evaluador" : "Evaluado") · @c.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    @if (c.ObjetivoId is not null)
+                    {
+                        var o = Model.Objetivos.FirstOrDefault(x => x.Id == c.ObjetivoId);
+                        <span class="badge text-bg-light border ms-1">Objetivo: @(o?.Descripcion.Length > 40 ? o.Descripcion[..40] + "…" : o?.Descripcion)</span>
+                    }
+                </div>
+                <div style="white-space: pre-line">@c.Texto</div>
+            </div>
+        }
+
+        <form action="@ViewData["AccionComentar"]" method="post" class="mt-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="asignacionId" value="@Model.Id" />
+            @if (Model.Objetivos.Count > 0)
+            {
+                <select name="objetivoId" class="form-select form-select-sm mb-2">
+                    <option value="">Comentario general</option>
+                    @foreach (var o in Model.Objetivos)
+                    {
+                        <option value="@o.Id">Sobre: @(o.Descripcion.Length > 60 ? o.Descripcion[..60] + "…" : o.Descripcion)</option>
+                    }
+                </select>
+            }
+            <textarea name="texto" class="form-control mb-2" rows="2" maxlength="1000" required placeholder="Escriba un comentario…"></textarea>
+            <button class="btn btn-sm btn-primary"><i class="bi bi-send"></i> Enviar</button>
+        </form>
+    </div>
+</div>

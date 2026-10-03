@@ -1,0 +1,43 @@
+@page
+@model BancaInti.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    Layout = "/Views/Shared/_LayoutAcceso.cshtml";
+}
+
+<div class="marca marca-oscura d-lg-none mb-4">
+    <img src="~/img/logo-inti.svg" alt="" width="36" height="36" />
+    <span class="marca-nombre">Banca<b>Inti</b></span>
+</div>
+
+<h2 class="h3 fw-bold mb-1">Bienvenido</h2>
+<p class="text-muted mb-4">Ingrese con su correo institucional.</p>
+
+<form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+
+    <div class="mb-3">
+        <label asp-for="Input.Email" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="nombre.apellido@bancainti.pe" autofocus />
+        </div>
+        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.Password" class="form-label"></label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+            <button type="button" class="input-group-text btn-ver-clave" data-ver-clave="#Input_Password" title="Mostrar contraseña" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
+        </div>
+        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+    </div>
+    <div class="form-check mb-4">
+        <input asp-for="Input.RememberMe" class="form-check-input" />
+        <label asp-for="Input.RememberMe" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Ingresar <i class="bi bi-arrow-right ms-1"></i></button>
+</form>
+
+<p class="text-muted small text-center mt-4 mb-0">¿Problemas para ingresar? Comuníquese con Recursos Humanos.</p>

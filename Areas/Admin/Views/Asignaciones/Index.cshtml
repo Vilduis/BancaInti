@@ -1,0 +1,113 @@
+@model AsignacionesViewModel
+@{
+    ViewData["Title"] = "Asignación de evaluadores";
+    int diasMinimos = ViewBag.DiasMinimos ?? 90;
+    ViewData["Seccion"] = "Personal";
+    ViewData["Descripcion"] = $"Defina quién evalúa a quién en el periodo. Solo participan los trabajadores con más de {diasMinimos} días efectivos.";
+}
+
+@section Acciones {
+    @if (Model.Periodos.Count > 0)
+    {
+        <form method="get" class="d-flex align-items-center gap-2">
+            <label for="periodoId" class="text-nowrap text-muted small">Periodo</label>
+            <select id="periodoId" name="periodoId" class="form-select" onchange="this.form.submit()">
+                @foreach (var p in Model.Periodos)
+                {
+                    <option value="@p.Id" selected="@(p.Id == Model.Periodo?.Id)">@p.Anio @(p.Activo ? "(activo)" : "")</option>
+                }
+            </select>
+        </form>
+    }
+}
+
+@if (Model.Periodo is null)
+{
+    <p class="text-muted">No hay periodos operativos. Créelos en <a asp-controller="PeriodosOperativos" asp-action="Index">Periodos operativos</a>.</p>
+    return;
+}
+
+@functions {
+    string Dias(int trabajadorId, int minimo)
+    {
+        var p = Model.Participacion[trabajadorId];
+        return p.DiasEfectivos > minimo ? $"{p.DiasEfectivos} días" : $"{p.DiasEfectivos} días · no participa";
+    }
+}
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">Asignar trabajadores</div>
+            <div class="card-body">
+                @if (Model.SinAsignar.Count == 0)
+                {
+                    <p class="text-muted mb-0">Todos los trabajadores del periodo tienen evaluador.</p>
+                }
+                else
+                {
+                    <form asp-action="Asignar" method="post">
+                        <input type="hidden" name="periodoId" value="@Model.Periodo.Id" />
+                        <div class="mb-3">
+                            <label for="evaluadorId" class="form-label">Evaluador</label>
+                            <select id="evaluadorId" name="evaluadorId" class="form-select" required>
+                                <option value="">-- Seleccione --</option>
+                                @foreach (var e in Model.Evaluadores)
+                                {
+                                    <option value="@e.Id">@e.NombreCompleto · @e.Area</option>
+                                }
+                            </select>
+                        </div>
+
+                        <p class="form-label mb-1">Trabajadores sin evaluador (@Model.SinAsignar.Count)</p>
+                        <div class="border rounded mb-3" style="max-height: 24rem; overflow-y: auto">
+                            @foreach (var area in Model.SinAsignar.GroupBy(t => t.Area))
+                            {
+                                <div class="bg-light px-2 py-1 small fw-semibold">@area.Key</div>
+                                @foreach (var t in area)
+                                {
+                                    var participa = Model.Participacion[t.Id].DiasEfectivos > diasMinimos;
+                                    <label class="d-flex align-items-center gap-2 px-2 py-1 border-top">
+                                        <input class="form-check-input mt-0" type="checkbox" name="evaluadoIds" value="@t.Id" />
+                                        <span class="flex-grow-1">@t.NombreCompleto <span class="text-muted small">· @t.Cargo</span></span>
+                                        <span class="small @(participa ? "text-muted" : "text-danger")">@Dias(t.Id, diasMinimos)</span>
+                                    </label>
+                                }
+                            }
+                        </div>
+                        <button class="btn btn-primary">Asignar</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        @if (Model.Equipos.Count == 0)
+        {
+            <p class="text-muted">Aún no hay asignaciones en el periodo @Model.Periodo.Anio.</p>
+        }
+        @foreach (var equipo in Model.Equipos)
+        {
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="bi bi-person-badge me-1"></i><strong>@equipo.Key.NombreCompleto</strong> <span class="text-muted">· @equipo.Key.Cargo</span></span>
+                    <span class="badge bg-secondary align-self-center">@equipo.Count() evaluado(s)</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var a in equipo)
+                    {
+                        var participa = Model.Participacion[a.EvaluadoId].DiasEfectivos > diasMinimos;
+                        <li class="list-group-item d-flex align-items-center gap-2">
+                            <span class="flex-grow-1">@a.Evaluado!.NombreCompleto <span class="text-muted small">· @a.Evaluado.Area</span></span>
+                            <span class="small @(participa ? "text-muted" : "text-danger")">@Dias(a.EvaluadoId, diasMinimos)</span>
+                            <form asp-action="Quitar" asp-route-id="@a.Id" method="post" data-confirm="¿Quitar a @a.Evaluado.NombreCompleto del equipo de @equipo.Key.NombreCompleto?">
+                                <button class="btn btn-sm btn-outline-danger" title="Quitar"><i class="bi bi-x-lg"></i></button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>

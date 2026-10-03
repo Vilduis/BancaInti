@@ -1,0 +1,64 @@
+@model List<Etapa>
+@inject EvaluacionService EvaluacionService
+@{
+    ViewData["Title"] = "Etapas";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = "Calendario de cada periodo operativo: Registro, Seguimiento y Evaluación. La etapa vigente habilita las acciones del evaluador.";
+    int? periodoId = ViewBag.PeriodoId;
+    string? periodoNombre = ViewBag.PeriodoNombre;
+    var hoy = EvaluacionService.Hoy;
+}
+
+@section Acciones {
+    <a class="btn btn-primary" asp-action="Create" asp-route-periodoId="@periodoId" data-modal><i class="bi bi-plus-lg"></i> Nueva etapa</a>
+}
+
+<div class="card tabla-card">
+    @if (periodoNombre is not null)
+    {
+        <div class="filtros-servidor d-flex flex-wrap align-items-center gap-2">
+            <span class="text-muted small">Mostrando solo las etapas del</span>
+            <strong>@periodoNombre</strong>
+            <a class="btn btn-sm btn-light border ms-1" asp-action="Index"><i class="bi bi-x-lg"></i> Ver todas</a>
+        </div>
+    }
+    <table class="table table-hover align-middle" data-tabla="Etapas">
+        <thead>
+            <tr>
+                <th data-filtro>Periodo</th>
+                <th data-filtro>Etapa</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th class="text-end">Días</th>
+                <th data-filtro>Estado</th>
+                <th class="no-exportar"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model)
+            {
+                var p = e.PeriodoOperativo!;
+                var (estado, clase) = hoy < e.FechaInicio ? ("Próxima", "bg-info-subtle text-info-emphasis")
+                                    : hoy > e.FechaFin ? ("Finalizada", "bg-secondary-subtle text-secondary-emphasis")
+                                    : ("Vigente", "bg-success");
+                <tr>
+                    <td class="fw-medium">Periodo @p.Anio @if (p.Activo) { <span class="badge bg-primary ms-1">Activo</span> }</td>
+                    <td>@PeriodoService.NombreEtapa(e.Tipo)</td>
+                    <td data-order="@e.FechaInicio.ToString("yyyy-MM-dd")">@e.FechaInicio.ToString("dd/MM/yyyy")</td>
+                    <td data-order="@e.FechaFin.ToString("yyyy-MM-dd")">@e.FechaFin.ToString("dd/MM/yyyy")</td>
+                    <td class="text-end">@(e.FechaFin.DayNumber - e.FechaInicio.DayNumber + 1)</td>
+                    <td><span class="badge @clase">@estado</span></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@e.Id" title="Editar" data-modal><i class="bi bi-pencil"></i></a>
+                        @if (!p.Activo)
+                        {
+                            <form asp-action="Delete" asp-route-id="@e.Id" method="post" class="d-inline" data-confirm="¿Eliminar la etapa @PeriodoService.NombreEtapa(e.Tipo) del periodo @p.Anio?">
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,69 @@
+@model ReglaForm
+@{
+    ViewData["Title"] = "Reglas de evaluación";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = $"{Model.PeriodoNombre} · La suma de pesos de los objetivos de cada evaluado debe ser 100 %.";
+}
+
+<form asp-action="Reglas" method="post" class="form-modal form-modal-lg">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="PeriodoOperativoId" />
+        <input type="hidden" asp-for="PeriodoNombre" />
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="row">
+            <div class="col-sm-6 mb-3">
+                <label asp-for="MinObjetivos" class="form-label"></label>
+                <input asp-for="MinObjetivos" class="form-control" />
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label asp-for="MaxObjetivos" class="form-label"></label>
+                <input asp-for="MaxObjetivos" class="form-control" />
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label asp-for="PesoMinimo" class="form-label"></label>
+                <input asp-for="PesoMinimo" class="form-control" />
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label asp-for="PesoMaximo" class="form-label"></label>
+                <input asp-for="PesoMaximo" class="form-control" />
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label asp-for="DiasMinimos" class="form-label"></label>
+                <input asp-for="DiasMinimos" class="form-control" />
+            </div>
+        </div>
+
+        <h3 class="form-subtitulo">Rangos de calificación (puntaje 0–100)</h3>
+        @* Filas dinámicas (site.js): al enviar, data-filas renumera los nombres a Rangos[i].<data-campo>. *@
+        <table class="table align-middle mb-2">
+            <thead>
+                <tr><th>Calificación</th><th style="width:7rem">Desde</th><th style="width:7rem">Hasta</th><th style="width:3rem"></th></tr>
+            </thead>
+            <tbody data-filas="Rangos">
+                @for (int i = 0; i < Model.Rangos.Count; i++)
+                {
+                    <tr>
+                        <td><input asp-for="Rangos[i].Nombre" class="form-control" data-campo="Nombre" /></td>
+                        <td><input asp-for="Rangos[i].PuntajeMinimo" class="form-control" data-campo="PuntajeMinimo" /></td>
+                        <td><input asp-for="Rangos[i].PuntajeMaximo" class="form-control" data-campo="PuntajeMaximo" /></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger" data-quitar-fila title="Quitar"><i class="bi bi-x-lg"></i></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <template id="fila-rango">
+            <tr>
+                <td><input class="form-control" data-campo="Nombre" /></td>
+                <td><input class="form-control" type="number" data-campo="PuntajeMinimo" value="0" /></td>
+                <td><input class="form-control" type="number" data-campo="PuntajeMaximo" value="0" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" data-quitar-fila title="Quitar"><i class="bi bi-x-lg"></i></button></td>
+            </tr>
+        </template>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-agregar-fila="fila-rango"><i class="bi bi-plus-lg"></i> Agregar rango</button>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Index" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

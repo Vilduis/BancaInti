@@ -1,0 +1,4 @@
+@{
+    // Los formularios abiertos con data-modal (site.js) llegan con la cabecera X-Modal y se pintan sin el layout de página.
+    Layout = Context.Request.Headers["X-Modal"] == "1" ? "/Views/Shared/_LayoutModal.cshtml" : "/Views/Shared/_Layout.cshtml";
+}

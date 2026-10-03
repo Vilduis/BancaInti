@@ -1,0 +1,44 @@
+@model JustificacionForm
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Nueva justificación" : "Editar justificación";
+    ViewData["Seccion"] = "Personal";
+    ViewData["Descripcion"] = "Ausencia que descuenta días efectivos del periodo.";
+}
+
+<form asp-action="Save" method="post" class="form-modal">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="TrabajadorId" class="form-label"></label>
+            <select asp-for="TrabajadorId" asp-items="ViewBag.Trabajadores" class="form-select">
+                <option value="">-- Seleccione --</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TipoJustificacionId" class="form-label"></label>
+            <select asp-for="TipoJustificacionId" asp-items="ViewBag.Tipos" class="form-select">
+                <option value="">-- Seleccione --</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label asp-for="FechaInicio" class="form-label"></label>
+                <input asp-for="FechaInicio" type="date" class="form-control" />
+            </div>
+            <div class="col mb-3">
+                <label asp-for="FechaFin" class="form-label"></label>
+                <input asp-for="FechaFin" type="date" class="form-control" />
+            </div>
+        </div>
+        <div>
+            <label asp-for="Observacion" class="form-label"></label>
+            <textarea asp-for="Observacion" class="form-control" rows="2"></textarea>
+        </div>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Index" asp-route-trabajadorId="@Model.TrabajadorId" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

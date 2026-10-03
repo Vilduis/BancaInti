@@ -1,0 +1,30 @@
+@model JustificacionesPeriodoForm
+@{
+    ViewData["Title"] = "Justificaciones que aplican";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = $"{Model.PeriodoNombre} · Los días de estos tipos se descuentan al calcular los días efectivos.";
+}
+
+<form asp-action="Justificaciones" method="post" class="form-modal">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="PeriodoOperativoId" />
+
+        @if (Model.Tipos.Count == 0)
+        {
+            <p class="text-muted mb-0">No hay tipos de justificación activos.</p>
+        }
+        <div class="list-group">
+            @foreach (var t in Model.Tipos)
+            {
+                <label class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+                    <input class="form-check-input m-0" type="checkbox" name="Seleccionados" value="@t.Id" checked="@Model.Seleccionados.Contains(t.Id)" />
+                    @t.Nombre
+                </label>
+            }
+        </div>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Index" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

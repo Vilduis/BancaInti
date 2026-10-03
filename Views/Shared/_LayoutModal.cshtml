@@ -1,0 +1,17 @@
+@* Layout para vistas abiertas en un modal (petición con cabecera X-Modal, ver site.js): solo cabecera y contenido. *@
+<div class="modal-header">
+    <div>
+        <h2 class="modal-title h5">@ViewData["Title"]</h2>
+        @if (ViewData["Descripcion"] is string descripcion)
+        {
+            <p class="modal-descripcion">@descripcion</p>
+        }
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+@RenderBody()
+@{
+    // Las secciones de página (botones del encabezado, scripts) no aplican dentro del modal.
+    foreach (var seccion in new[] { "Acciones", "Scripts", "Estilos" })
+        if (IsSectionDefined(seccion)) IgnoreSection(seccion);
+}

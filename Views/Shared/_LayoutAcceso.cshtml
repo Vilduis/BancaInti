@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BancaInti</title>
+    <partial name="_Cabecera" />
+</head>
+@* Pantalla de acceso: panel de marca a la izquierda y formulario a la derecha, sin menú ni pie. *@
+<body class="acceso">
+    <section class="acceso-marca d-none d-lg-flex">
+        <img class="acceso-sol" src="~/img/logo-inti.svg" alt="" />
+        <div class="marca">
+            <img src="~/img/logo-inti.svg" alt="" width="44" height="44" />
+            <span class="marca-nombre">Banca<b>Inti</b></span>
+        </div>
+
+        <div class="acceso-mensaje">
+            <h1>Evaluación de Desempeño</h1>
+            <p>Objetivos claros, seguimiento continuo y resultados transparentes para todo el equipo.</p>
+            <ol class="acceso-etapas">
+                <li><span>1</span><div><strong>Registro</strong>Objetivos con peso y meta.</div></li>
+                <li><span>2</span><div><strong>Seguimiento</strong>Avances y comentarios durante el año.</div></li>
+                <li><span>3</span><div><strong>Evaluación</strong>Puntaje final y calificación.</div></li>
+            </ol>
+        </div>
+
+        <div class="acceso-pie">Recursos Humanos</div>
+    </section>
+
+    <main class="acceso-formulario">
+        <div class="acceso-caja">
+            @RenderBody()
+        </div>
+    </main>
+
+    <partial name="_Scripts" />
+</body>
+</html>

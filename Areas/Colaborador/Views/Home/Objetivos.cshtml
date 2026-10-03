@@ -1,0 +1,80 @@
+@model AsignacionEvaluador?
+@{
+    ViewData["Title"] = "Mis objetivos";
+    PeriodoOperativo? periodo = ViewBag.Periodo;
+    ViewData["AccionComentar"] = Url.Action("Comentar");
+}
+
+<h1 class="h3 mb-1">Mis objetivos</h1>
+
+@if (periodo is null)
+{
+    <p class="text-muted">No hay un periodo de evaluación activo.</p>
+    return;
+}
+@if (Model is null)
+{
+    <p class="text-muted">Periodo @periodo.Anio · Aún no tiene un evaluador asignado. Comuníquese con Recursos Humanos.</p>
+    return;
+}
+
+<p class="text-muted mb-3">
+    Periodo @periodo.Anio · Evaluador: <strong>@Model.Evaluador!.NombreCompleto</strong> (@Model.Evaluador.Cargo)
+</p>
+
+@if (Model.Estado == EstadoEvaluacion.Borrador)
+{
+    <div class="alert alert-info">Su evaluador aún no ha confirmado sus objetivos. Podrá verlos aquí cuando estén listos.</div>
+    return;
+}
+
+@if (Model.Estado == EstadoEvaluacion.Evaluado)
+{
+    <div class="alert alert-success">
+        <div class="small text-muted">Evaluación final</div>
+        <div class="fs-5"><strong>@Model.PuntajeFinal?.ToString("0.##") puntos</strong> <partial name="_CalificacionBadge" model="Model.Calificacion" /></div>
+        <div class="mt-1" style="white-space: pre-line">@Model.ComentarioFinal</div>
+    </div>
+}
+else
+{
+    var avanceTotal = EvaluacionService.AvancePonderado(Model.Objetivos);
+    <div class="mb-3" style="max-width: 24rem">
+        <div class="small text-muted">Avance general (ponderado por peso)</div>
+        <partial name="_BarraAvance" model="(decimal?)avanceTotal" />
+    </div>
+}
+
+<div class="card mb-4">
+    <ul class="list-group list-group-flush">
+        @foreach (var o in Model.Objetivos)
+        {
+            <li class="list-group-item">
+                <div class="d-flex flex-wrap gap-3 align-items-start">
+                    <div class="flex-grow-1" style="min-width: 16rem">
+                        <div class="fw-semibold">@o.Descripcion</div>
+                        <div class="small text-muted">Indicador: @o.Indicador · Meta: @o.Meta.ToString("0.##") @o.UnidadMedida</div>
+                    </div>
+                    <div class="text-center" style="width: 5rem">
+                        <div class="small text-muted">Peso</div>
+                        <div class="fw-semibold">@o.Peso %</div>
+                    </div>
+                    <div style="width: 11rem">
+                        <div class="small text-muted">Avance</div>
+                        <partial name="_BarraAvance" model="EvaluacionService.AvancePorcentaje(o)" />
+                    </div>
+                    @if (o.Cumplimiento is not null)
+                    {
+                        <div class="text-center" style="width: 7rem">
+                            <div class="small text-muted">Cumplimiento</div>
+                            <div class="fw-semibold">@o.Cumplimiento %</div>
+                        </div>
+                    }
+                </div>
+                <partial name="_HistorialSeguimiento" model="o" />
+            </li>
+        }
+    </ul>
+</div>
+
+<partial name="_Comentarios" model="Model" />

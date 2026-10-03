@@ -1,0 +1,58 @@
+@model EtapaForm
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    var nueva = Model.Id == 0;
+    ViewData["Title"] = nueva ? "Nueva etapa" : "Editar etapa";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = "Las etapas van en orden (Registro → Seguimiento → Evaluación), sin cruzarse y dentro del periodo.";
+}
+
+<form asp-action="Save" method="post" class="form-modal">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        @if (nueva)
+        {
+            <div class="mb-3">
+                <label asp-for="PeriodoOperativoId" class="form-label"></label>
+                <select asp-for="PeriodoOperativoId" asp-items="ViewBag.Periodos" class="form-select">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Tipo" class="form-label"></label>
+                <select asp-for="Tipo" asp-items="Html.GetEnumSelectList<TipoEtapa>()" class="form-select">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        }
+        else
+        {
+            @* Al editar solo cambian las fechas. *@
+            <input type="hidden" asp-for="PeriodoOperativoId" />
+            <input type="hidden" asp-for="Tipo" />
+            <div class="etapa-resumen mb-3">
+                <i class="bi bi-calendar3"></i>
+                <div>
+                    <strong>@PeriodoService.NombreEtapa(Model.Tipo!.Value)</strong>
+                    <div class="small text-muted">@(((SelectList)ViewBag.Periodos).FirstOrDefault(i => i.Value == Model.PeriodoOperativoId.ToString())?.Text)</div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col">
+                <label asp-for="FechaInicio" class="form-label"></label>
+                <input asp-for="FechaInicio" type="date" class="form-control" />
+            </div>
+            <div class="col">
+                <label asp-for="FechaFin" class="form-label"></label>
+                <input asp-for="FechaFin" type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Index" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

@@ -1,0 +1,79 @@
+@model MiEquipoViewModel
+@{
+    ViewData["Title"] = "Mi equipo";
+    ViewData["Descripcion"] = Model.Periodo is null
+        ? "No hay un periodo de evaluación activo."
+        : $"Colaboradores que usted evalúa en el periodo {Model.Periodo.Anio}: registre sus objetivos, el seguimiento y la evaluación final.";
+}
+
+@if (Model.Periodo is null)
+{
+    return;
+}
+
+@section Acciones {
+    <span class="etapa-vigente"><i class="bi bi-calendar-check"></i> Etapa vigente: <strong>@(Model.Etapa is { } etapa ? PeriodoService.NombreEtapa(etapa) : "ninguna")</strong></span>
+    @if (Model.Asignaciones.Count > 0)
+    {
+        <a class="btn btn-primary" asp-action="PdfEquipo"><i class="bi bi-file-earmark-pdf"></i> PDF del equipo</a>
+    }
+}
+
+@if (Model.Asignaciones.Count == 0)
+{
+    <p class="text-muted">No tiene evaluados asignados en este periodo.</p>
+    return;
+}
+
+<div class="card tabla-card">
+    <table class="table table-hover align-middle" data-tabla="Mi equipo">
+        <thead>
+            <tr>
+                <th>Evaluado</th>
+                <th data-filtro>Cargo</th>
+                <th class="text-end">Días efectivos</th>
+                <th class="text-center">Objetivos</th>
+                <th class="text-end">Peso total</th>
+                <th style="width: 10rem">Avance</th>
+                <th data-filtro>Estado</th>
+                <th>Resultado</th>
+                <th class="no-exportar"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model.Asignaciones)
+            {
+                var suma = a.Objetivos.Sum(o => o.Peso);
+                var avance = EvaluacionService.AvancePonderado(a.Objetivos);
+                <tr>
+                    <td class="fw-medium">@a.Evaluado!.NombreCompleto</td>
+                    <td class="text-muted small">@a.Evaluado.Cargo</td>
+                    <td class="text-end">@Model.Participacion[a.EvaluadoId].DiasEfectivos</td>
+                    <td class="text-center">@a.Objetivos.Count</td>
+                    <td class="text-end @(suma == 100 ? "" : "text-danger")">@suma %</td>
+                    <td>
+                        <div class="progress" role="progressbar" aria-valuenow="@avance" aria-valuemin="0" aria-valuemax="100" title="@avance %">
+                            <div class="progress-bar" style="width: @(avance.ToString(System.Globalization.CultureInfo.InvariantCulture))%">@(avance > 0 ? $"{avance:0.#} %" : "")</div>
+                        </div>
+                    </td>
+                    <td><partial name="_EstadoBadge" model="a.Estado" /></td>
+                    <td class="text-nowrap">
+                        @if (a.PuntajeFinal is null)
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                        else
+                        {
+                            <strong class="me-1">@a.PuntajeFinal.Value.ToString("0.##")</strong>
+                            <partial name="_CalificacionBadge" model="a.Calificacion" />
+                        }
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-secondary" asp-controller="Evaluados" asp-action="Pdf" asp-route-id="@a.Id" title="Exportar PDF"><i class="bi bi-file-earmark-pdf"></i></a>
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="Evaluados" asp-action="Detalle" asp-route-id="@a.Id">Gestionar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

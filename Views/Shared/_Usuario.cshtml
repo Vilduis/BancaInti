@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject BancaInti.Data.ApplicationDbContext Db
+@* Bloque de usuario al pie del sidebar: nombre, rol y cerrar sesión. *@
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var t = await Db.Trabajadores.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
+    var nombre = t is null ? "Administrador" : $"{t.Nombres.Split(' ')[0]} {t.Apellidos.Split(' ')[0]}";
+    var iniciales = t is null ? "AD" : $"{t.Nombres[0]}{t.Apellidos[0]}";
+    var rol = User.IsInRole(Roles.Admin) ? "Recursos Humanos"
+            : User.IsInRole(Roles.Evaluador) ? "Evaluador" : "Colaborador";
+}
+<div class="sidebar-usuario">
+    <span class="avatar">@iniciales</span>
+    <div class="usuario-texto flex-grow-1 overflow-hidden">
+        <div class="nombre text-truncate" title="@User.Identity?.Name">@nombre</div>
+        <div class="rol">@rol</div>
+    </div>
+    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+        <button type="submit" class="btn-salir" title="Cerrar sesión" aria-label="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button>
+    </form>
+</div>

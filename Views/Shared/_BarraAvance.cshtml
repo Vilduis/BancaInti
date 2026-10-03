@@ -1,0 +1,6 @@
+@model decimal?
+@* Avance % de un objetivo (null = sin avance). La barra topa en 100. *@
+<div class="progress" role="progressbar" aria-valuenow="@(Model ?? 0)" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar @(Model >= 100 ? "bg-success" : "")" style="width: @(Math.Min(Model ?? 0, 100).ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+</div>
+<div class="small">@(Model is null ? "Sin avance" : $"{Model:0.#} %")</div>

@@ -1,0 +1,23 @@
+# Compilación
+bin/
+obj/
+*.user
+*.suo
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Notas internas de desarrollo (no se publican)
+CLAUDE.md
+docs/fases_proyecto.md
+.claude/
+
+# Configuración local y secretos
+appsettings.*.local.json
+*.env
+
+# Sistema
+Thumbs.db
+.DS_Store

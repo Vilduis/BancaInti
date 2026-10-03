@@ -1,0 +1,24 @@
+@model Objetivo
+@{
+    var historial = Model.Seguimientos.OrderByDescending(s => s.Fecha).ThenByDescending(s => s.Id).ToList();
+}
+@if (historial.Count > 0)
+{
+    <details class="mt-2">
+        <summary class="small text-muted">Historial de seguimiento (@historial.Count)</summary>
+        <table class="table table-sm small mt-1 mb-0">
+            <thead><tr><th>Fecha</th><th class="text-end">Avance</th><th class="text-end">%</th><th>Comentario</th></tr></thead>
+            <tbody>
+                @foreach (var s in historial)
+                {
+                    <tr>
+                        <td>@s.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">@s.Avance.ToString("0.##") @Model.UnidadMedida</td>
+                        <td class="text-end">@((s.Avance / Model.Meta * 100).ToString("0.#")) %</td>
+                        <td>@s.Comentario</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </details>
+}

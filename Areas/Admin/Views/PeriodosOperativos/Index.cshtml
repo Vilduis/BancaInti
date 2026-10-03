@@ -1,0 +1,54 @@
+@model List<PeriodoOperativo>
+@{
+    ViewData["Title"] = "Periodos operativos";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = "Año de evaluación con las justificaciones que aplican y sus reglas. Solo un periodo puede estar activo.";
+}
+
+@section Acciones {
+    <a class="btn btn-primary" asp-action="Create" data-modal><i class="bi bi-plus-lg"></i> Nuevo periodo</a>
+}
+
+<div class="card tabla-card">
+    <table class="table table-hover align-middle" data-tabla="Periodos operativos">
+        <thead>
+            <tr>
+                <th>Año</th>
+                <th data-filtro>Periodo estratégico</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th data-filtro>Estado</th>
+                <th class="no-exportar"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@p.Anio</td>
+                    <td>@p.PeriodoEstrategico?.Nombre</td>
+                    <td data-order="@p.FechaInicio.ToString("yyyy-MM-dd")">@p.FechaInicio.ToString("dd/MM/yyyy")</td>
+                    <td data-order="@p.FechaFin.ToString("yyyy-MM-dd")">@p.FechaFin.ToString("dd/MM/yyyy")</td>
+                    <td><span class="badge @(p.Activo ? "bg-primary" : "bg-secondary-subtle text-secondary-emphasis")">@(p.Activo ? "Activo" : "Inactivo")</span></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Justificaciones" asp-route-id="@p.Id" title="Justificaciones que aplican" data-modal><i class="bi bi-clipboard-check"></i></a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Reglas" asp-route-id="@p.Id" title="Reglas de evaluación" data-modal="lg"><i class="bi bi-sliders2"></i></a>
+                        @if (!p.Activo)
+                        {
+                            <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline" data-confirm="¿Activar el periodo @p.Anio? El periodo activo actual se desactivará.">
+                                <button class="btn btn-sm btn-outline-success" title="Activar"><i class="bi bi-power"></i></button>
+                            </form>
+                        }
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@p.Id" title="Editar" data-modal><i class="bi bi-pencil"></i></a>
+                        @if (!p.Activo)
+                        {
+                            <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" data-confirm="¿Eliminar el periodo @p.Anio con sus etapas, justificaciones y reglas?">
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

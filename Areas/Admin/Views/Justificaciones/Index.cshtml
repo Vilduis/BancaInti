@@ -1,0 +1,55 @@
+@model List<JustificacionTrabajador>
+@{
+    ViewData["Title"] = "Registro de justificaciones";
+    ViewData["Seccion"] = "Personal";
+    ViewData["Descripcion"] = "Ausencias de cada trabajador (descansos médicos, licencias, vacaciones) que descuentan días efectivos del periodo.";
+    int? trabajadorId = ViewBag.TrabajadorId;
+    string? trabajadorNombre = ViewBag.TrabajadorNombre;
+}
+
+@section Acciones {
+    <a class="btn btn-primary" asp-action="Create" asp-route-trabajadorId="@trabajadorId" data-modal><i class="bi bi-plus-lg"></i> Nueva justificación</a>
+}
+
+<div class="card tabla-card">
+    @if (trabajadorNombre is not null)
+    {
+        <div class="filtros-servidor d-flex flex-wrap align-items-center gap-2">
+            <span class="text-muted small">Mostrando solo las justificaciones de</span>
+            <strong>@trabajadorNombre</strong>
+            <a class="btn btn-sm btn-light border ms-1" asp-action="Index"><i class="bi bi-x-lg"></i> Ver todas</a>
+        </div>
+    }
+    <table class="table table-hover align-middle" data-tabla="Justificaciones">
+        <thead>
+            <tr>
+                <th data-filtro>Trabajador</th>
+                <th data-filtro>Tipo</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th class="text-end">Días</th>
+                <th>Observación</th>
+                <th class="no-exportar"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var j in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@j.Trabajador!.NombreCompleto</td>
+                    <td>@j.TipoJustificacion!.Nombre</td>
+                    <td data-order="@j.FechaInicio.ToString("yyyy-MM-dd")">@j.FechaInicio.ToString("dd/MM/yyyy")</td>
+                    <td data-order="@j.FechaFin.ToString("yyyy-MM-dd")">@j.FechaFin.ToString("dd/MM/yyyy")</td>
+                    <td class="text-end">@j.Dias</td>
+                    <td class="text-muted small">@j.Observacion</td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@j.Id" title="Editar" data-modal><i class="bi bi-pencil"></i></a>
+                        <form asp-action="Delete" asp-route-id="@j.Id" method="post" class="d-inline" data-confirm="¿Eliminar esta justificación de @j.Trabajador.NombreCompleto?">
+                            <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

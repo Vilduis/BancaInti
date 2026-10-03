@@ -1,0 +1,18 @@
+<div class="col-auto">
+    <label class="form-label small mb-0" for="desde">Desde</label>
+    <input id="desde" name="desde" type="date" value="@(((DateOnly)ViewBag.Desde).ToString("yyyy-MM-dd"))" class="form-control" />
+</div>
+<div class="col-auto">
+    <label class="form-label small mb-0" for="hasta">Hasta</label>
+    <input id="hasta" name="hasta" type="date" value="@(((DateOnly)ViewBag.Hasta).ToString("yyyy-MM-dd"))" class="form-control" />
+</div>
+<div class="col-auto">
+    <label class="form-label small mb-0" for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" value="@ViewBag.Usuario" class="form-control" placeholder="correo o parte" />
+</div>
+<div class="col-auto">
+    <label class="form-label small mb-0" for="entidad">Entidad</label>
+    <select id="entidad" name="entidad" asp-items="ViewBag.Entidades" class="form-select">
+        <option value="">Todas</option>
+    </select>
+</div>

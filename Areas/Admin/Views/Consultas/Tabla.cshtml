@@ -1,0 +1,72 @@
+@model TablaConsulta
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Seccion"] = "Consultas";
+    ViewData["Descripcion"] = Model.Subtitulo ?? "";
+}
+
+<div class="card tabla-card">
+    @if (Model.Filtros is not null)
+    {
+        @* Filtros que cambian los datos consultados (se aplican en el servidor). *@
+        <form method="get" class="filtros-servidor row g-2 align-items-end">
+            <partial name="@Model.Filtros" />
+            <div class="col-auto">
+                <button class="btn btn-primary"><i class="bi bi-arrow-repeat"></i> Consultar</button>
+            </div>
+        </form>
+    }
+
+    <table class="table table-sm table-hover align-middle" data-tabla="@Model.Archivo">
+        <thead>
+            <tr>
+                @foreach (var c in Model.Columnas)
+                {
+                    if (Model.ColumnasFiltro.Contains(c))
+                    {
+                        <th data-filtro>@c</th>
+                    }
+                    else
+                    {
+                        <th>@c</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fila in Model.Filas)
+            {
+                <tr>
+                    @for (var i = 0; i < fila.Length; i++)
+                    {
+                        var valor = fila[i];
+                        switch (valor)
+                        {
+                            case string s when Model.Columnas[i] == "Calificación":
+                                <td><partial name="_CalificacionBadge" model="s" /></td>
+                                break;
+                            case DateOnly d:
+                                <td data-order="@d.ToString("yyyy-MM-dd")" class="text-nowrap">@d.ToString("dd/MM/yyyy")</td>
+                                break;
+                            case DateTime dt:
+                                <td data-order="@dt.ToString("yyyy-MM-ddTHH:mm:ss")" class="text-nowrap">@dt.ToString("dd/MM/yyyy HH:mm")</td>
+                                break;
+                            case bool b:
+                                <td><span class="badge @(b ? "bg-success" : "bg-danger")">@(b ? "Sí" : "No")</span></td>
+                                break;
+                            case int or decimal:
+                                <td class="text-end">@(valor is decimal m ? m.ToString("0.##") : valor)</td>
+                                break;
+                            case string s when s.StartsWith('{'):
+                                <td><code class="small text-wrap" style="word-break: break-all">@s</code></td>
+                                break;
+                            default:
+                                <td>@valor</td>
+                                break;
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

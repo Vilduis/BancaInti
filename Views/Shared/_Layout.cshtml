@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BancaInti</title>
+    <partial name="_Cabecera" />
+    @* Antes de pintar: restaura el sidebar colapsado (escritorio) para que no parpadee. *@
+    <script>try { if (localStorage.getItem('sidebar') === 'colapsado') document.documentElement.classList.add('sidebar-colapsado'); } catch { }</script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css" />
+    @await RenderSectionAsync("Estilos", required: false)
+</head>
+@{
+    var areaActual = ViewContext.RouteData.Values["area"] as string ?? "";
+    var ctrlActual = ViewContext.RouteData.Values["controller"] as string ?? "";
+    var accionActual = ViewContext.RouteData.Values["action"] as string ?? "";
+
+    // "active" si la ruta actual coincide (la acción solo se compara si se indica).
+    string Activo(string area, string controller, string? accion = null) =>
+        area == areaActual && controller == ctrlActual && (accion is null || accion == accionActual) ? "active" : "";
+
+    // Menú de RRHH: grupos desplegables. Una opción con acción Index cubre todo su controller (Create, Edit...).
+    (string Id, string Titulo, string Icono, (string Texto, string Ctrl, string Accion)[] Opciones)[] grupos =
+    [
+        ("menu-config", "Configuración", "bi-sliders",
+        [
+            ("Periodos estratégicos", "PeriodosEstrategicos", "Index"),
+            ("Periodos operativos", "PeriodosOperativos", "Index"),
+            ("Etapas", "Etapas", "Index"),
+            ("Tipos de justificación", "TiposJustificacion", "Index"),
+        ]),
+        ("menu-personal", "Personal", "bi-people",
+        [
+            ("Trabajadores", "Trabajadores", "Index"),
+            ("Asignación de evaluadores", "Asignaciones", "Index"),
+            ("Registro de justificaciones", "Justificaciones", "Index"),
+        ]),
+        ("menu-consultas", "Consultas", "bi-search",
+        [
+            ("Lista de participantes", "Consultas", "Participantes"),
+            ("Justificaciones por trabajador", "Consultas", "Justificaciones"),
+            ("Mayores de 60 años", "Consultas", "Mayores"),
+            ("Evaluadores y sus evaluados", "Consultas", "Evaluadores"),
+            ("Auditoría", "Consultas", "Auditoria"),
+        ]),
+    ];
+    bool OpcionActiva((string Texto, string Ctrl, string Accion) o) =>
+        areaActual == "Admin" && o.Ctrl == ctrlActual && (o.Accion == "Index" || o.Accion == accionActual);
+}
+<body>
+    <div class="app">
+        <aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-label="Menú principal">
+            <div class="sidebar-marca">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="marca">
+                    <img src="~/img/logo-inti.svg" alt="" width="34" height="34" />
+                    <span class="marca-texto">
+                        <span class="marca-nombre">Banca<b>Inti</b></span>
+                        <span class="marca-sub">Evaluación de Desempeño</span>
+                    </span>
+                </a>
+                <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Cerrar"></button>
+            </div>
+
+            <nav class="sidebar-nav">
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <a class="nav-link @Activo("Admin", "Home")" asp-area="Admin" asp-controller="Home" asp-action="Index" data-titulo="Inicio"><i class="bi bi-house-door"></i><span class="nav-texto">Inicio</span></a>
+
+                    @foreach (var g in grupos)
+                    {
+                        var abierto = g.Opciones.Any(OpcionActiva);
+                        <button type="button" class="nav-link nav-grupo @(abierto ? "abierto" : "collapsed")" data-bs-toggle="collapse" data-bs-target="#@g.Id" aria-expanded="@(abierto ? "true" : "false")" aria-controls="@g.Id" data-titulo="@g.Titulo">
+                            <i class="bi @g.Icono"></i><span class="nav-texto">@g.Titulo</span><i class="bi bi-chevron-down flecha"></i>
+                        </button>
+                        <div class="collapse @(abierto ? "show" : "")" id="@g.Id" data-bs-parent=".sidebar-nav">
+                            <div class="nav-submenu">
+                                @foreach (var o in g.Opciones)
+                                {
+                                    <a class="nav-link @(OpcionActiva(o) ? "active" : "")" asp-area="Admin" asp-controller="@o.Ctrl" asp-action="@o.Accion">@o.Texto</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                @if (User.IsInRole(Roles.Evaluador))
+                {
+                    <a class="nav-link @(areaActual == "Evaluador" ? "active" : "")" asp-area="Evaluador" asp-controller="Home" asp-action="Index" data-titulo="Mi equipo"><i class="bi bi-people-fill"></i><span class="nav-texto">Mi equipo</span></a>
+                }
+                @if (User.IsInRole(Roles.Colaborador))
+                {
+                    <a class="nav-link @(areaActual == "Colaborador" ? "active" : "")" asp-area="Colaborador" asp-controller="Home" asp-action="Objetivos" data-titulo="Mis objetivos"><i class="bi bi-bullseye"></i><span class="nav-texto">Mis objetivos</span></a>
+                }
+            </nav>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <partial name="_Usuario" />
+            }
+        </aside>
+
+        <div class="app-principal">
+            <header class="topbar d-lg-none">
+                <button class="btn btn-link text-white p-0 fs-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menú">
+                    <i class="bi bi-list"></i>
+                </button>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="marca">
+                    <img src="~/img/logo-inti.svg" alt="" width="26" height="26" />
+                    <span class="marca-nombre">Banca<b>Inti</b></span>
+                </a>
+            </header>
+            @* Barra de escritorio: botón para colapsar el sidebar (Ctrl+B) y ruta de la página. *@
+            <header class="barra-escritorio d-none d-lg-flex">
+                <button type="button" class="btn-sidebar" data-sidebar-toggle title="Ocultar menú (Ctrl+B)" aria-label="Ocultar menú" aria-controls="sidebar" aria-expanded="true">
+                    <i class="bi bi-layout-sidebar"></i>
+                </button>
+                <span class="barra-separador"></span>
+                <nav class="barra-ruta" aria-label="Ruta">
+                    @if (ViewData["Seccion"] is string seccion)
+                    {
+                        <span>@seccion</span><i class="bi bi-chevron-right"></i>
+                    }
+                    <span class="actual">@ViewData["Title"]</span>
+                </nav>
+            </header>
+            <main role="main" class="contenido">
+                @* Encabezado común de módulo: la vista define ViewData["Descripcion"] (y opcionalmente "Seccion" y @section Acciones). *@
+                @if (ViewData["Descripcion"] is string descripcion)
+                {
+                    <div class="encabezado">
+                        <div>
+                            @if (ViewData["Seccion"] is string seccionMovil)
+                            {
+                                <div class="encabezado-ruta d-lg-none">@seccionMovil <i class="bi bi-chevron-right"></i> @ViewData["Title"]</div>
+                            }
+                            <h1 class="h3">@ViewData["Title"]</h1>
+                            <p>@descripcion</p>
+                        </div>
+                        @if (IsSectionDefined("Acciones"))
+                        {
+                            <div class="encabezado-acciones">@await RenderSectionAsync("Acciones")</div>
+                        }
+                    </div>
+                }
+                <partial name="_Alertas" />
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <partial name="_Scripts" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
+    <script src="~/js/tablas.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

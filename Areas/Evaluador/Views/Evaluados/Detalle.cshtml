@@ -1,0 +1,133 @@
+@model EvaluadoDetalleViewModel
+@{
+    var a = Model.Asignacion;
+    var e = a.Evaluado!;
+    ViewData["Title"] = e.NombreCompleto;
+    ViewData["AccionComentar"] = Url.Action("Comentar");
+    var enRegistro = Model.Etapa == TipoEtapa.Registro;
+    var editable = enRegistro && a.Estado == EstadoEvaluacion.Borrador;
+    var enSeguimiento = Model.Etapa == TipoEtapa.Seguimiento && a.Estado == EstadoEvaluacion.Confirmado;
+    var enEvaluacion = Model.Etapa == TipoEtapa.Evaluacion && a.Estado == EstadoEvaluacion.Confirmado;
+}
+
+<a asp-controller="Home" asp-action="Index" class="small"><i class="bi bi-arrow-left"></i> Mi equipo</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">@e.NombreCompleto</h1>
+        <div class="text-muted">
+            @e.Cargo · @e.Area · @Model.Participacion.DiasEfectivos días efectivos ·
+            Etapa vigente: <strong>@(Model.Etapa is { } et ? PeriodoService.NombreEtapa(et) : "ninguna")</strong>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <partial name="_EstadoBadge" model="a.Estado" />
+        <a class="btn btn-sm btn-outline-primary" asp-action="Pdf" asp-route-id="@a.Id"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</a>
+    </div>
+</div>
+
+@if (a.Estado == EstadoEvaluacion.Evaluado)
+{
+    <div class="alert alert-success">
+        <div class="fs-5"><strong>@a.PuntajeFinal?.ToString("0.##") puntos</strong> <partial name="_CalificacionBadge" model="a.Calificacion" /></div>
+        <div class="mt-1" style="white-space: pre-line">@a.ComentarioFinal</div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span>
+            Objetivos (@a.Objetivos.Count de @Model.Regla.MinObjetivos–@Model.Regla.MaxObjetivos) ·
+            Peso total <strong class="@(Model.SumaPesos == 100 ? "text-success" : "text-danger")">@Model.SumaPesos %</strong>
+            <span class="text-muted small">· cada peso entre @Model.Regla.PesoMinimo % y @Model.Regla.PesoMaximo %</span>
+        </span>
+        <span class="d-flex gap-2">
+            @if (editable)
+            {
+                <a class="btn btn-sm btn-outline-primary" asp-action="NuevoObjetivo" asp-route-asignacionId="@a.Id" data-modal><i class="bi bi-plus-lg"></i> Objetivo</a>
+                <form asp-action="Confirmar" asp-route-id="@a.Id" method="post" data-confirm="¿Confirmar los objetivos? El colaborador podrá verlos y ya no se podrán editar.">
+                    <button class="btn btn-sm btn-primary"><i class="bi bi-check2-circle"></i> Confirmar objetivos</button>
+                </form>
+            }
+            @if (enRegistro && a.Estado == EstadoEvaluacion.Confirmado)
+            {
+                <form asp-action="Reabrir" asp-route-id="@a.Id" method="post" data-confirm="¿Reabrir los objetivos para editarlos?">
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-unlock"></i> Reabrir</button>
+                </form>
+            }
+            @if (enEvaluacion)
+            {
+                <a class="btn btn-sm btn-success" asp-action="Evaluar" asp-route-id="@a.Id"><i class="bi bi-clipboard-check"></i> Evaluar</a>
+            }
+        </span>
+    </div>
+
+    @if (a.Objetivos.Count == 0)
+    {
+        <div class="card-body text-muted">
+            @(enRegistro ? "Registre los objetivos del colaborador." : "No se registraron objetivos.")
+        </div>
+    }
+
+    <ul class="list-group list-group-flush">
+        @foreach (var o in a.Objetivos)
+        {
+            var avance = EvaluacionService.AvancePorcentaje(o);
+            <li class="list-group-item">
+                <div class="d-flex flex-wrap gap-3 align-items-start">
+                    <div class="flex-grow-1" style="min-width: 16rem">
+                        <div class="fw-semibold">@o.Descripcion</div>
+                        <div class="small text-muted">Indicador: @o.Indicador · Meta: @o.Meta.ToString("0.##") @o.UnidadMedida</div>
+                    </div>
+                    <div class="text-center" style="width: 5rem">
+                        <div class="small text-muted">Peso</div>
+                        <div class="fw-semibold">@o.Peso %</div>
+                    </div>
+                    <div style="width: 11rem">
+                        <div class="small text-muted">Avance</div>
+                        <partial name="_BarraAvance" model="avance" />
+                    </div>
+                    @if (o.Cumplimiento is not null)
+                    {
+                        <div class="text-center" style="width: 7rem">
+                            <div class="small text-muted">Cumplimiento</div>
+                            <div class="fw-semibold">@o.Cumplimiento %</div>
+                        </div>
+                    }
+                    @if (editable)
+                    {
+                        <div class="text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="EditarObjetivo" asp-route-asignacionId="@a.Id" asp-route-id="@o.Id" title="Editar" data-modal><i class="bi bi-pencil"></i></a>
+                            <form asp-action="EliminarObjetivo" asp-route-asignacionId="@a.Id" asp-route-id="@o.Id" method="post" class="d-inline" data-confirm="¿Eliminar este objetivo?">
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+                @if (enSeguimiento)
+                {
+                    <form asp-action="RegistrarAvance" method="post" class="row g-2 mt-2 align-items-end">
+                        <input type="hidden" name="asignacionId" value="@a.Id" />
+                        <input type="hidden" name="ObjetivoId" value="@o.Id" />
+                        <div class="col-sm-3">
+                            <label class="form-label small mb-0">Avance acumulado (@o.UnidadMedida)</label>
+                            <input name="Avance" type="number" step="0.01" min="0" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-sm-7">
+                            <label class="form-label small mb-0">Comentario (opcional)</label>
+                            <input name="Comentario" maxlength="500" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-outline-primary w-100">Registrar</button>
+                        </div>
+                    </form>
+                }
+
+                <partial name="_HistorialSeguimiento" model="o" />
+            </li>
+        }
+    </ul>
+</div>
+
+<partial name="_Comentarios" model="a" />

@@ -1,0 +1,42 @@
+@model List<TipoJustificacion>
+@{
+    ViewData["Title"] = "Tipos de justificación";
+    ViewData["Seccion"] = "Configuración";
+    ViewData["Descripcion"] = "Catálogo de ausencias que descuentan días efectivos. Un tipo inactivo ya no se puede usar en nuevas justificaciones.";
+}
+
+@section Acciones {
+    <form asp-action="Save" method="post" class="d-flex gap-2">
+        <input name="nombre" class="form-control" placeholder="Nuevo tipo (ej. Licencia por luto)" maxlength="80" required style="min-width: 18rem" />
+        <button class="btn btn-primary text-nowrap"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </form>
+}
+
+<div class="card tabla-card">
+    <table class="table align-middle" data-tabla="Tipos de justificación">
+        <thead>
+            <tr><th>Nombre</th><th data-filtro>Estado</th><th class="no-exportar"></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr class="@(t.Activo ? "" : "text-muted")">
+                    <td data-search="@t.Nombre" data-order="@t.Nombre">
+                        <form asp-action="Save" asp-route-id="@t.Id" method="post" class="d-flex gap-2" style="max-width: 28rem">
+                            <input name="nombre" value="@t.Nombre" class="form-control form-control-sm" maxlength="80" required aria-label="Nombre" />
+                            <button class="btn btn-sm btn-outline-primary" title="Guardar nombre"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                    </td>
+                    <td>
+                        <span class="badge @(t.Activo ? "bg-success" : "bg-secondary")">@(t.Activo ? "Activo" : "Inactivo")</span>
+                    </td>
+                    <td class="text-end">
+                        <form asp-action="CambiarEstado" asp-route-id="@t.Id" method="post">
+                            <button class="btn btn-sm btn-outline-secondary">@(t.Activo ? "Desactivar" : "Activar")</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

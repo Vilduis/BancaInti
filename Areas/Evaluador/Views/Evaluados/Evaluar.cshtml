@@ -1,0 +1,90 @@
+@model EvaluacionForm
+@{
+    AsignacionEvaluador a = ViewBag.Asignacion;
+    var rangos = a.PeriodoOperativo!.Regla!.Rangos.OrderBy(r => r.PuntajeMinimo).ToList();
+    ViewData["Title"] = "Evaluación";
+}
+
+<a asp-action="Detalle" asp-route-id="@a.Id" class="small"><i class="bi bi-arrow-left"></i> @a.Evaluado!.NombreCompleto</a>
+<h1 class="h3 mt-2 mb-1">Evaluación de @a.Evaluado!.NombreCompleto</h1>
+<p class="text-muted">
+    Registre el resultado y el % de cumplimiento (0–100) de cada objetivo. Se sugiere el último avance registrado.
+    Puntaje = Σ (cumplimiento × peso).
+</p>
+
+<form asp-action="Evaluar" method="post" id="form-evaluar">
+    <input type="hidden" asp-for="AsignacionId" />
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Objetivo</th>
+                    <th class="text-end">Peso</th>
+                    <th class="text-end">Meta</th>
+                    <th style="width: 10rem">Resultado</th>
+                    <th style="width: 9rem">Cumplimiento (%)</th>
+                    <th class="text-end">Puntos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Objetivos.Count; i++)
+                {
+                    var o = a.Objetivos.First(x => x.Id == Model.Objetivos[i].ObjetivoId);
+                    <tr>
+                        <td>
+                            @o.Descripcion
+                            <input type="hidden" asp-for="Objetivos[i].ObjetivoId" />
+                        </td>
+                        <td class="text-end" data-peso="@o.Peso">@o.Peso %</td>
+                        <td class="text-end text-nowrap">@o.Meta.ToString("0.##") @o.UnidadMedida</td>
+                        <td><input asp-for="Objetivos[i].ResultadoFinal" type="number" step="0.01" min="0" class="form-control form-control-sm" /></td>
+                        <td><input asp-for="Objetivos[i].Cumplimiento" type="number" min="0" max="100" class="form-control form-control-sm cumplimiento" /></td>
+                        <td class="text-end puntos"></td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5" class="text-end">Puntaje final</th>
+                    <th class="text-end"><span id="total"></span> <div class="small fw-normal" id="calificacion"></div></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mb-3" style="max-width: 48rem">
+        <label asp-for="ComentarioFinal" class="form-label"></label>
+        <textarea asp-for="ComentarioFinal" class="form-control" rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-success">Cerrar evaluación</button>
+    <a asp-action="Detalle" asp-route-id="@a.Id" class="btn btn-link">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        // Vista previa del puntaje; el cálculo oficial lo hace el servidor al cerrar.
+        const rangos = @Json.Serialize(rangos.Select(r => new { r.Nombre, r.PuntajeMinimo, r.PuntajeMaximo }));
+        const form = document.getElementById('form-evaluar');
+        form.dataset.confirm = '¿Cerrar la evaluación? Ya no se podrá modificar.';
+
+        function recalcular() {
+            let total = 0;
+            form.querySelectorAll('tbody tr').forEach(fila => {
+                const peso = Number(fila.querySelector('[data-peso]').dataset.peso);
+                const cumpl = Math.min(Math.max(Number(fila.querySelector('.cumplimiento').value) || 0, 0), 100);
+                const puntos = cumpl * peso / 100;
+                fila.querySelector('.puntos').textContent = puntos.toFixed(2);
+                total += puntos;
+            });
+            const entero = Math.round(total);
+            const rango = rangos.find(r => r.puntajeMinimo <= entero && entero <= r.puntajeMaximo);
+            document.getElementById('total').textContent = total.toFixed(2);
+            document.getElementById('calificacion').textContent = rango ? rango.nombre : '';
+        }
+        form.addEventListener('input', recalcular);
+        recalcular();
+    </script>
+}

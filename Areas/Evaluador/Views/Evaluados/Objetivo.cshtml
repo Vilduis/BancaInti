@@ -1,0 +1,51 @@
+@model ObjetivoForm
+@{
+    AsignacionEvaluador a = ViewBag.Asignacion;
+    var regla = a.PeriodoOperativo!.Regla!;
+    var pesoOtros = a.Objetivos.Where(o => o.Id != Model.Id).Sum(o => o.Peso);
+    ViewData["Title"] = Model.Id == 0 ? "Nuevo objetivo" : "Editar objetivo";
+    ViewData["Seccion"] = a.Evaluado!.NombreCompleto;
+    ViewData["Descripcion"] = $"Peso permitido: {regla.PesoMinimo} %–{regla.PesoMaximo} % · Ya asignado en otros objetivos: {pesoOtros} % (disponible: {100 - pesoOtros} %)";
+}
+
+<form asp-action="GuardarObjetivo" method="post" class="form-modal form-modal-lg">
+    <div class="form-modal-cuerpo">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="AsignacionId" />
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Descripcion" class="form-label"></label>
+            <textarea asp-for="Descripcion" class="form-control" rows="2" placeholder="Ej. Incrementar la colocación de créditos MYPE"></textarea>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Indicador" class="form-label"></label>
+            <input asp-for="Indicador" class="form-control" placeholder="Ej. Monto desembolsado" />
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <label asp-for="Peso" class="form-label"></label>
+                <input asp-for="Peso" type="number" min="1" max="100" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+                <label asp-for="Meta" class="form-label"></label>
+                <input asp-for="Meta" type="number" step="0.01" min="0.01" class="form-control" />
+            </div>
+            <div class="col-sm-4">
+                <label asp-for="UnidadMedida" class="form-label"></label>
+                <input asp-for="UnidadMedida" class="form-control" placeholder="Ej. S/, %, clientes" list="unidades" />
+                <datalist id="unidades">
+                    <option value="%"></option>
+                    <option value="S/"></option>
+                    <option value="clientes"></option>
+                    <option value="operaciones"></option>
+                    <option value="proyectos"></option>
+                </datalist>
+            </div>
+        </div>
+    </div>
+    <div class="form-modal-pie">
+        <a asp-action="Detalle" asp-route-id="@a.Id" class="btn btn-light" data-cancelar>Cancelar</a>
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+    </div>
+</form>

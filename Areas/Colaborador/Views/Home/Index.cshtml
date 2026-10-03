@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Bienvenido";
+}
+
+<div class="card mensaje-bienvenida mx-auto mt-lg-5">
+    <div class="card-body p-4 p-md-5">
+        <p class="fs-6 mb-4" style="white-space: pre-line">@ViewBag.Mensaje</p>
+        <div class="text-end">
+            <a class="btn btn-primary px-5" asp-action="Objetivos">OK</a>
+        </div>
+    </div>
+</div>

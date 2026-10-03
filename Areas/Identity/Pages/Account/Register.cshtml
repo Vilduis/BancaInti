@@ -1,0 +1,6 @@
+@page
+@* Reemplaza la página de registro de Identity: los usuarios los crea RRHH o el seed. *@
+@functions {
+    public IActionResult OnGet() => RedirectToPage("./Login");
+    public IActionResult OnPost() => RedirectToPage("./Login");
+}

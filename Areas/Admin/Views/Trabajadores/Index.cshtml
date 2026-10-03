@@ -1,0 +1,42 @@
+@model List<Trabajador>
+@{
+    ViewData["Title"] = "Trabajadores";
+    ViewData["Seccion"] = "Personal";
+    ViewData["Descripcion"] = "Personal del banco con sus datos laborales y el usuario con el que ingresa al sistema.";
+}
+
+<div class="card tabla-card">
+    <table class="table table-sm table-hover align-middle" data-tabla="Trabajadores">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th data-filtro>Cargo</th>
+                <th data-filtro>Área</th>
+                <th>Nacimiento</th>
+                <th>Ingreso</th>
+                <th>Cese</th>
+                <th>Usuario</th>
+                <th class="no-exportar"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Codigo</td>
+                    <td>@t.Dni</td>
+                    <td class="fw-medium">@t.NombreCompleto</td>
+                    <td>@t.Cargo</td>
+                    <td>@t.Area</td>
+                    <td data-order="@t.FechaNacimiento.ToString("yyyy-MM-dd")">@t.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                    <td data-order="@t.FechaIngreso.ToString("yyyy-MM-dd")">@t.FechaIngreso.ToString("dd/MM/yyyy")</td>
+                    <td data-order="@t.FechaCese?.ToString("yyyy-MM-dd")">@t.FechaCese?.ToString("dd/MM/yyyy")</td>
+                    <td class="text-muted">@t.User?.Email</td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-controller="Justificaciones" asp-action="Index" asp-route-trabajadorId="@t.Id" title="Ver justificaciones"><i class="bi bi-clipboard-check"></i></a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

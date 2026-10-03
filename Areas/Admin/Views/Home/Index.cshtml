@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<h1 class="h3 mb-1">Recursos Humanos</h1>
+<p class="text-muted mb-4">Configure el periodo de evaluación, gestione al personal y revise las consultas.</p>
+
+<h2 class="h5 mb-3">Configuración</h2>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="PeriodosEstrategicos" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-flag me-1"></i> Periodos estratégicos</h2>
+                <p class="text-muted small mb-0">Horizonte de varios años que agrupa los periodos operativos.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="PeriodosOperativos" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-calendar3 me-1"></i> Periodos operativos</h2>
+                <p class="text-muted small mb-0">Año de evaluación, etapas, justificaciones y reglas.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="TiposJustificacion" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-file-earmark-medical me-1"></i> Tipos de justificación</h2>
+                <p class="text-muted small mb-0">Catálogo de ausencias que descuentan días.</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h2 class="h5 mt-4 mb-3">Personal</h2>
+<div class="row g-3">
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Trabajadores" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-people me-1"></i> Trabajadores</h2>
+                <p class="text-muted small mb-0">Personal registrado y sus usuarios.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Asignaciones" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-diagram-3 me-1"></i> Asignación de evaluadores</h2>
+                <p class="text-muted small mb-0">Quién evalúa a quién en cada periodo.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Justificaciones" asp-action="Index">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-clipboard-check me-1"></i> Registro de justificaciones</h2>
+                <p class="text-muted small mb-0">Ausencias registradas que descuentan días.</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h2 class="h5 mt-4 mb-3">Consultas</h2>
+<div class="row g-3">
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Consultas" asp-action="Participantes">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-person-check me-1"></i> Lista de participantes</h2>
+                <p class="text-muted small mb-0">Quiénes superan los 90 días efectivos en el periodo.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Consultas" asp-action="Justificaciones">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-calendar-x me-1"></i> Justificaciones por trabajador</h2>
+                <p class="text-muted small mb-0">Ausencias de cada trabajador en el periodo.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Consultas" asp-action="Mayores">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-hourglass-split me-1"></i> Mayores de 60 años</h2>
+                <p class="text-muted small mb-0">Trabajadores vigentes por edad.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Consultas" asp-action="Evaluadores">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-diagram-3 me-1"></i> Evaluadores y sus evaluados</h2>
+                <p class="text-muted small mb-0">Estado, avance y resultado por evaluado.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="card tarjeta-link h-100 text-decoration-none" asp-controller="Consultas" asp-action="Auditoria">
+            <div class="card-body">
+                <h2 class="h6"><i class="bi bi-shield-check me-1"></i> Auditoría</h2>
+                <p class="text-muted small mb-0">Quién cambió qué y cuándo.</p>
+            </div>
+        </a>
+    </div>
+</div>

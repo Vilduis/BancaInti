@@ -1,0 +1,10 @@
+@model EstadoEvaluacion
+@{
+    var clase = Model switch
+    {
+        EstadoEvaluacion.Confirmado => "bg-primary",
+        EstadoEvaluacion.Evaluado => "bg-success",
+        _ => "bg-secondary",
+    };
+}
+<span class="badge @clase">@EvaluacionService.EstadoTexto(Model)</span>
